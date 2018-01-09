@@ -1,6 +1,6 @@
-@guest
+{{-- @guest
 @include('welcome')
-@else
+@else --}}
 @include ('layouts.head')
 @include ('layouts.nav2')
 @include ('layouts.header')
@@ -129,4 +129,4 @@
 <br>
 <br>
 @include ('layouts.footer')
-@endguest
+{{-- @endguest --}}

@@ -1,64 +1,79 @@
-@guest
-@include('welcome'); 
-@else
 @include ('layouts.head')
 @include ('layouts.nav2')
 @include ('layouts.header')
-
 <div class="container ">
   <div class="row">
     <div class="col-lg-9 col-md-9 col-sm-9 blog-main">
-        <h2>Posts by {{ $username }}</h2>
+      <h2>Posts by {{ $username }}</h2>
       <br>
       <div class="post-preview">
-        @if($all == 0)
-          <?php $i=0; ?>
-          @foreach ($posts as $post )
-            @if($i < 10)  
-              @include('posts.viewpost')
-            @endif
-            <?php $i++; ?>
-          @endforeach
-      @elseif($all === '20')
-          <?php $i=0; ?>
-          @foreach ($posts as $post )
-            @if($i > 10 and $i < 20)  
-              @include('posts.viewpost')
-            @endif
-            <?php $i++; ?>
-          @endforeach
-      @elseif($all === '30')
-          <?php $i=0; ?>
-          @foreach ($posts as $post )
-            @if($i > 20 and $i < 30)  
-              @include('posts.viewpost')
-            @endif
-            <?php $i++; ?>
-          @endforeach
-      @elseif($all === 'all')
-          @foreach ($posts as $post )
-              @include('posts.viewpost')
-          @endforeach
-      @endif
-            </div>
-            <div class="clearfix">
-              @if($all === 0)
-              <a class="btn btn-primary pull-right" href="/index/20">Next(10) Posts &rarr;</a>
-              @elseif($all === '20')
-              <a class="btn btn-primary pull-right" href="/index/30">Next(10) Posts &rarr;</a>
-              <a class="btn btn-primary pull-right" href="/index">&larr; Previous(10) Posts </a>
-              @elseif($all == '30')
-              <a class="btn btn-primary pull-right" href="/index/all">All Posts &rarr;</a>
-              @elseif($all === 'all')
-              <a class="btn btn-primary pull-right" href="/index/20">&larr; Previous(10) Posts </a>
-              @endif
-            </div>
-          </div>
-          @include('layouts.sidebar')
+        @foreach ($posts as $post )
+        <div class='postdiv'>
+          @guest
+          @include('posts.viewpost_nologin')
+          @else
+          @include('posts.viewpost')
+          @endguest
+        </div> 
+        @endforeach
+      </div>
+      <?php
+      $postsPerPage = 5;
+      $totalPages = ceil($totalposts / $postsPerPage);
+      ?>
+
+      @if($totalPages > 1)
+
+      <?php
+
+      
+// Check that the page number is set.
+      if(!isset($_GET['page'])){
+        $_GET['page'] = 0;
+      }else{
+    // Convert the page number to an integer
+        $_GET['page'] = (int)$_GET['page'];
+      }
+
+
+// If the page number is less than 1, make it 1.
+      if($_GET['page'] < 1){
+        $_GET['page'] = 1;
+    // Check that the page is below the last page
+      }else if($_GET['page'] > $totalPages){
+        $_GET['page'] = $totalPages;
+      }
+      ?>
+
+      <div class="centerpagination">
+        <div class="pagination pull-right">
+          <?php 
+          $pageless = $_GET['page'] - 1;
+          $pagemore = $_GET['page'] + 1;
+          if(!isset($_GET['page']) or $_GET['page'] !== 1){
+            echo '<a href="?page=' .$pageless. '">&laquo;</a>'; 
+          }
+          foreach(range(1, $totalPages) as $page){
+    // Check if we're on the current page in the loop
+            if($page == $_GET['page']){
+              echo '<a class="btn btn-primary">' . $page . '</a>';
+            }else if($page == 1 || $page == $totalPages || ($page >= $_GET['page'] - 2 && $page <= $_GET['page'] + 2)){
+              echo '<a href="?page=' . $page . '">' . $page . '</a>';
+            }
+          }
+          if( $_GET['page'] != $totalPages){
+            echo '<a href="?page=' .$pagemore. '">&raquo;</a>';
+          }
+          ?>
         </div>
       </div>
-      <br>
-      @include ('layouts.footer')
-      @endguest
+      @endif
+  </div>
+  @include('layouts.sidebar')
+</div>
+</div>
+<br>
+@include ('layouts.footer')
+
 
 

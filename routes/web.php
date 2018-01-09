@@ -1,7 +1,7 @@
 <?php
 
 Route::get('/', function () {
-    return redirect('/login');
+    return redirect('/index');
 });
 
 Auth::routes();

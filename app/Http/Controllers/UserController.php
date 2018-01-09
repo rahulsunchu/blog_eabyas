@@ -17,127 +17,152 @@ class UserController extends Controller
     public function profile(Request $request, $userid = 0){
 
         if($userid == 0){
-    	$user = Auth::user();
-        }
-        else{
+         $user = Auth::user();
+     }
+     else{
         $user = User::find($userid);
-        }
-		$url = Storage::url('public/avatars/'.$user->id.'.jpeg');
-        $posts = post::selectRaw('count(user_id) as postsByUser')
-                ->where('user_id', '=' ,Auth::id())
-                ->get();
-        $postsByUser = $posts[0]->postsByUser;
+    }
+    $url = Storage::url('public/avatars/'.$user->id.'.jpeg');
+    $posts = post::selectRaw('count(user_id) as postsByUser')
+    ->where('user_id', '=' ,Auth::id())
+    ->get();
+    $postsByUser = $posts[0]->postsByUser;
         // dd($postsByUser);
 
-    	return view('users.user', compact('user', 'url', 'postsByUser'));
-    }
-    public function edit(Request $request){
+    return view('users.user', compact('user', 'url', 'postsByUser'));
+}
+public function edit(Request $request){
         // dd($request);
-    	$user = Auth::user();
+ $user = Auth::user();
 		// $url = Storage::url('public/rahul.jpeg');
-        $url = Storage::url('public/avatars/'.$user->id.'.jpeg');
-        $posts = post::selectRaw('count(user_id) as postsByUser')
-                ->where('user_id', '=' ,Auth::id())
-                ->get();
-        $postsByUser = $posts[0]->postsByUser;
-    	return view('users.useredit', compact('user', 'url','postsByUser'));
-    }
-    public function update(Request $request){
-        dd($request);
-        $user = Auth::user();
-        $url = Storage::url('public/avatars/'.$user->id.'.jpeg');
+ $url = Storage::url('public/avatars/'.$user->id.'.jpeg');
+ $posts = post::selectRaw('count(user_id) as postsByUser')
+ ->where('user_id', '=' ,Auth::id())
+ ->get();
+ $postsByUser = $posts[0]->postsByUser;
+ return view('users.useredit', compact('user', 'url','postsByUser'));
+}
+public function update(Request $request){
+    dd($request);
+    $user = Auth::user();
+    $url = Storage::url('public/avatars/'.$user->id.'.jpeg');
 
 
         // $url = Storage::url('public/rahul.jpeg');
-        return view('users.useredit', compact('user', 'url'));
-    }
-    public function index($all = 0){
+    return view('users.useredit', compact('user', 'url'));
+}
+public function index($all = 0){
 
-        if($month = request('month') and $year = request('year')){
+    if($month = request('month') and $year = request('year')){
             // dd('dd');
         $posts = DB::table('posts')
-            ->join('users', 'users.id', '=', 'posts.user_id')
-            ->leftJoin('likes', 'posts.id', '=', 'likes.post_id', 'and', Auth::id(), '=', 'likes.user')
-            ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
-            ->whereRaw("monthname(posts.created_at) = '$month'")
-            ->where('posts.user_id', '=', Auth::id())
-            ->whereYear('posts.created_at', $year)
-            ->orderByRaw('posts.created_at DESC')
-            ->get();
+        ->join('users', 'users.id', '=', 'posts.user_id')
+        ->leftJoin('likes', 'posts.id', '=', 'likes.post_id', 'and', Auth::id(), '=', 'likes.user')
+        ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
+        ->whereRaw("monthname(posts.created_at) = '$month'")
+        ->where('posts.user_id', '=', Auth::id())
+        ->whereYear('posts.created_at', $year)
+        ->orderByRaw('posts.created_at DESC')
+        ->get();
 
-        }
-        else{
+    }
+    else{
 
-            $posts = DB::table('posts')
-            ->join('users', 'users.id', '=', 'posts.user_id')
-            ->leftJoin('likes', 'posts.id', '=', 'likes.post_id', 'and', Auth::id(), '=', 'likes.user')
-            ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
-            ->where('posts.user_id', '=', Auth::id())
-            ->orderByRaw('posts.created_at DESC')
-            ->get();
+        $posts = DB::table('posts')
+        ->join('users', 'users.id', '=', 'posts.user_id')
+        ->leftJoin('likes', 'posts.id', '=', 'likes.post_id', 'and', Auth::id(), '=', 'likes.user')
+        ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
+        ->where('posts.user_id', '=', Auth::id())
+        ->orderByRaw('posts.created_at DESC')
+        ->get();
             // dd($posts);
-        }
+    }
 
             // $posts->whereMonth('created_at', 12);
-        $comment_count = DB::table('posts')
-            ->join('comments', 'posts.id', '=', 'comments.post_id')
-            ->selectraw('posts.id, count(comments.id) as cid')
-            ->groupBy('posts.id')
-            ->get();
-        $comments = DB::table('posts')
-            ->join('comments', 'posts.id', '=', 'comments.post_id')
-            ->join('users', 'users.id', '=', 'comments.user_id')
-            ->selectraw('posts.id, users.name, users.profilepic, comments.id as comment_id ,users.id as user_id, comments.body,comments.edited, comments.created_at')
-            ->orderByRaw('comments.created_at DESC')
-            ->get();
-        return view('users.userposts', compact('posts', 'comment_count', 'all', 'comments'));
+    $comment_count = DB::table('posts')
+    ->join('comments', 'posts.id', '=', 'comments.post_id')
+    ->selectraw('posts.id, count(comments.id) as cid')
+    ->groupBy('posts.id')
+    ->get();
+    $comments = DB::table('posts')
+    ->join('comments', 'posts.id', '=', 'comments.post_id')
+    ->join('users', 'users.id', '=', 'comments.user_id')
+    ->selectraw('posts.id, users.name, users.profilepic, comments.id as comment_id ,users.id as user_id, comments.body,comments.edited, comments.created_at')
+    ->orderByRaw('comments.created_at DESC')
+    ->get();
+    return view('users.userposts', compact('posts', 'comment_count', 'all', 'comments'));
+}
+public function userindex($userid = 0){
+    if(Auth::check()){
+        $userid = Auth::id();
     }
- public function userindex($userid = 0){
+    $totalposts=DB::table('posts')
+    ->selectraw('count(id) as totalposts')
+    ->get();
+    $totalposts = $totalposts[0]->totalposts;
         // dd($userid);
-        if($month = request('month') and $year = request('year')){
+    if($month = request('month') and $year = request('year')){
             // dd('dd');
         $posts = DB::table('posts')
-            ->join('users', 'users.id', '=', 'posts.user_id')
-            ->leftJoin('likes', function ($join) {
-              $join->on('posts.id', '=', 'likes.post_id')->where('likes.user_id', '=',Auth::id());
-            })
-            ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
-            ->whereRaw("monthname(posts.created_at) = '$month'")
-            ->where('posts.user_id', '=', $userid)
-            ->whereYear('posts.created_at', $year)
-            ->orderByRaw('posts.created_at DESC')
-            ->get();
+        ->join('users', 'users.id', '=', 'posts.user_id')
+        ->leftJoin('likes', function ($join) {
+          $join->on('posts.id', '=', 'likes.post_id')->where('likes.user_id', '=',Auth::id());
+      })
+        ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
+        ->whereRaw("monthname(posts.created_at) = '$month'")
+        ->where('posts.user_id', '=', $userid)
+        ->whereYear('posts.created_at', $year)
+        ->orderByRaw('posts.created_at DESC')
+        ->get();
 
-        }
-        else{
-
-            $posts = DB::table('posts')
-            ->join('users', 'users.id', '=', 'posts.user_id')
-            ->leftJoin('likes', function ($join) {
-              $join->on('posts.id', '=', 'likes.post_id')->where('likes.user_id', '=',Auth::id());
-            })
-            ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
-            ->where('posts.user_id', '=', $userid)
-            ->orderByRaw('posts.created_at DESC')
-            ->get();
+    }
+    else{
+       if(isset($_GET['page']))
+       {
+        $postsPerPage = 5;
+        $startPost = ($_GET['page'] - 1) * $postsPerPage;
+        $posts = DB::table('posts')
+        ->join('users', 'users.id', '=', 'posts.user_id')
+        ->leftJoin('likes', function ($join) {
+          $join->on('posts.id', '=', 'likes.post_id')->where('likes.user_id', '=',Auth::id());
+      })
+        ->select('posts.*', 'users.name', 'users.email','users.designation','users.profilepic', 'likes.likestatus')
+        ->where('posts.user_id', '=', $userid)
+        ->orderByRaw('posts.created_at DESC')
+        ->offset($startPost)
+        ->limit(5)
+        ->get();
             // dd($posts);
-        }
+    }
+    else{
+        $posts = DB::table('posts')
+        ->join('users', 'users.id', '=', 'posts.user_id')
+        ->leftJoin('likes', function ($join) {
+          $join->on('posts.id', '=', 'likes.post_id')->where('likes.user_id', '=',Auth::id());
+        })
+        ->select('posts.*', 'users.name', 'users.designation','users.email','users.profilepic', 'likes.likestatus')
+        ->orderByRaw('posts.created_at DESC')
+        ->limit(5)
+        ->get();
+      }
 
             // $posts->whereMonth('created_at', 12);
-        $usr = User::find($userid);
-        $username = $usr->name;
-        $comment_count = DB::table('posts')
-            ->join('comments', 'posts.id', '=', 'comments.post_id')
-            ->selectraw('posts.id, count(comments.id) as cid')
-            ->groupBy('posts.id')
-            ->get();
-        $comments = DB::table('posts')
-            ->join('comments', 'posts.id', '=', 'comments.post_id')
-            ->join('users', 'users.id', '=', 'comments.user_id')
-            ->selectraw('posts.id, users.name, users.profilepic, comments.id as comment_id ,users.id as user_id, comments.body,comments.edited, comments.created_at')
-            ->orderByRaw('comments.created_at DESC')
-            ->get();
-            $all = 0;
-        return view('users.userposts', compact('posts', 'comment_count', 'all', 'comments', 'username'));
-    }
+    $usr = User::find($userid);
+    $username = $usr->name;
+    $comment_count = DB::table('posts')
+    ->join('comments', 'posts.id', '=', 'comments.post_id')
+    ->selectraw('posts.id, count(comments.id) as cid')
+    ->groupBy('posts.id')
+    ->get();
+    $comments = DB::table('posts')
+    ->join('comments', 'posts.id', '=', 'comments.post_id')
+    ->join('users', 'users.id', '=', 'comments.user_id')
+    ->selectraw('posts.id, users.name, users.profilepic, comments.id as comment_id ,users.id as user_id, comments.body,comments.edited, comments.created_at')
+    ->orderByRaw('comments.created_at DESC')
+    ->get();
+    
+    return view('users.userposts', compact('posts', 'comment_count', 'totalposts', 'comments', 'username'));
+
+}
+}
 }

@@ -1,6 +1,3 @@
-@guest
-@include('auth.login') 
-@else
 @include ('layouts.head')
 @include ('layouts.nav2')
 @include ('layouts.header')
@@ -10,18 +7,22 @@
       <div class="post-preview">
         @foreach ($posts as $post )
         <div class='postdiv'>
+          @guest
+          @include('posts.viewpost_nologin')
+          @else
           @include('posts.viewpost')
+          @endguest
         </div> 
         @endforeach
       </div>
-<?php
+      <?php
       $postsPerPage = 5;
       $totalPages = ceil($totalposts / $postsPerPage);
-?>
+      ?>
 
-@if($totalPages > 1)
+      @if($totalPages > 1)
 
-<?php
+      <?php
 
       
 // Check that the page number is set.
@@ -59,7 +60,7 @@
             }
           }
           if( $_GET['page'] != $totalPages){
-          echo '<a href="?page=' .$pagemore. '">&raquo;</a>';
+            echo '<a href="?page=' .$pagemore. '">&raquo;</a>';
           }
           ?>
         </div>
@@ -74,6 +75,6 @@
 <br>
 
 @include ('layouts.footer')
-@endguest
+
 
 
